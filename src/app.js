@@ -36,8 +36,15 @@ app.use(async (req, res, next) => {
     }
     next();
   } catch (error) {
-    next(error);
-  }
+  console.error('Vercel database connection error:', {
+    name: error.name,
+    code: error.code || null,
+    databaseConfigured: Boolean(config.mongoUri),
+    connectionState: mongoose.connection.readyState
+  });
+
+  next(error);
+}
 });
 
 app.get('/health', (req, res) => {
