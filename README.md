@@ -233,3 +233,41 @@ After creating both users and their employees, open MongoDB Compass or Atlas's c
 4. The employees collection with multiple employee documents.
 5. Each employee's user ObjectId linking to its owner in the users collection.
 Capture the database before running the two cleanup DELETE requests if you want your employee documents to remain visible in the screenshots. Save the screenshots in screenshots/, along with Postman evidence for signup, login, CRUD, authorization, validation, rate limiting, Helmet response headers, /health, and the sanitized local logs. Mask JWTs, passwords, database secrets and personal information before saving or submitting.
+13. Live Deployment (Vercel)
+
+The COMP3123 Assignment 1 Employee Management REST API is deployed on Vercel.
+
+### Production Base URL
+
+https://101436656-comp-3123-assignment1.vercel.app
+
+### Health Check
+
+https://101436656-comp-3123-assignment1.vercel.app/health
+
+A successful health check returns HTTP 200 OK and confirms that MongoDB Atlas is connected and the application is running in production.
+
+### Production API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | /health | Application health check |
+| POST | /api/v1/user/signup | Register a user |
+| POST | /api/v1/user/login | Authenticate and obtain JWT |
+| POST | /api/v1/emp/employees | Create an employee |
+| GET | /api/v1/emp/employees | Retrieve employees |
+| GET | /api/v1/emp/employees/:id | Retrieve an employee by ID |
+| PUT | /api/v1/emp/employees/:id | Update an employee |
+| DELETE | /api/v1/emp/employees?eid=:id | Delete an employee |
+
+### Testing the Deployed API
+
+The API was tested using Postman against the live Vercel deployment.
+
+Tests included user registration, login, JWT authentication, employee CRUD operations, ownership authorization, and deletion verification.
+
+Protected endpoints require a valid JWT using the Authorization header:
+
+Authorization: Bearer YOUR_JWT_TOKEN
+
+MongoDB Atlas provides the production database connection. Database credentials and JWT secrets are configured using Vercel environment variables and are not included in the source code.
