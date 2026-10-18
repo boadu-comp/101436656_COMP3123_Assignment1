@@ -46,6 +46,7 @@ GitHub repository: https://github.com/boadu-comp/101436656_COMP3123_Assignment1
 │   │   └── logger.js
 │   └── validators/requestValidators.js
 ├── tests/employeeFields.test.js
+├──.env.example
 ├── scripts/check-syntax.js
 ├── postman/COMP3123_Assignment1.postman_collection.json
 ├── screenshots/
