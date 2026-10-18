@@ -1,13 +1,1750 @@
 {
   "info": {
+    "_postman_id": "1dcf13dc-4cb1-4b3d-b560-20e7d5bc48cd",
     "name": "COMP3123 Assignment 1 - Employee Management API",
-    "_postman_id": "960315bb-4a8e-42cb-8357-9f15ca182002",
-    "description": "Ordered tests for exact required endpoints, JWT, CRUD, two-user access denial, invalid input and rate limiting. Run the main folders in order. Run the optional rate-limit folder separately.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "description": "Ordered tests for exact required endpoints, JWT, CRUD, two-user access denial, invalid input and rate limiting. Run the main folders in order. Run the optional rate-limit folder separately.  Safe-to-share export: password and bearer token variables are empty. Configure these in Postman after importing. Vercel production employee IDs are captured from Create Employee A.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38230911"
   },
-  "auth": {
-    "type": "noauth"
-  },
+  "item": [
+    {
+      "name": "1 - Health, signup, login",
+      "item": [
+        {
+          "name": "01 Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Database connected\", () => pm.expect(pm.response.json().database).to.eql(\"connected\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 Register User A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"No password in response\", function () { pm.expect(pm.response.text()).to.not.include(pm.collectionVariables.get(\"localPasswordA\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo_user_a\",\n  \"email\": \"demo.a@example.com\",\n  \"password\": \"{{localPasswordA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 Register User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"User B created\", function () { pm.expect(pm.response.json().data.user.username).to.eql(\"demo_user_b\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo_user_b\",\n  \"email\": \"demo.b@example.com\",\n  \"password\": \"{{localPasswordB}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 Login User A (username)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenA\", pm.response.json().data.token);",
+                  "pm.test(\"Bearer token supplied\", function () { pm.expect(pm.response.json().data.token).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo_user_a\",\n  \"password\": \"{{localPasswordA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 Login User B (email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"tokenB\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo.b@example.com\",\n  \"password\": \"{{localPasswordB}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2 - Employee success tests",
+      "item": [
+        {
+          "name": "06 User A creates Employee A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"employeeAId\", pm.response.json().data._id);",
+                  "pm.test(\"Has owner\", function () { pm.expect(pm.response.json().data.user).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.rivera@example.com\",\n  \"position\": \"Software Developer\",\n  \"salary\": 68000,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 User B creates Employee B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"employeeBId\", pm.response.json().data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Jordan\",\n  \"last_name\": \"Patel\",\n  \"email\": \"jordan.patel@example.com\",\n  \"position\": \"Analyst\",\n  \"salary\": 59000,\n  \"date_of_joining\": \"2026-02-15\",\n  \"department\": \"Operations\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 User A lists only own employees",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"A sees employee A only\", function () { const ids = pm.response.json().data.map(e => e._id); pm.expect(ids).to.include(pm.collectionVariables.get(\"employeeAId\")); pm.expect(ids).to.not.include(pm.collectionVariables.get(\"employeeBId\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 User A gets Employee A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/{{employeeAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{employeeAId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 User A updates Employee A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Update saved\", function () { pm.expect(pm.response.json().data.position).to.eql(\"Senior Developer\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Senior Developer\",\n  \"salary\": 73000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/{{employeeAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{employeeAId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3 - Security and validation failures",
+      "item": [
+        {
+          "name": "11 User A cannot GET Employee B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/{{employeeBId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{employeeBId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12 User B cannot GET Employee A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/{{employeeAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{employeeAId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13 User A cannot UPDATE Employee B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Unauthorized change\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/{{employeeBId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{employeeBId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14 User B cannot DELETE Employee A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "eid",
+                  "value": "{{employeeAId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15 User A cannot DELETE Employee B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeBId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "eid",
+                  "value": "{{employeeBId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "16 Missing JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17 Invalid JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{invalidToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18 Invalid employee ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/not-a-mongo-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "not-a-mongo-id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "19 Invalid salary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.rivera@example.com\",\n  \"position\": \"Software Developer\",\n  \"salary\": -200,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "20 Attempt to set owner from request body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.rivera@example.com\",\n  \"position\": \"Software Developer\",\n  \"salary\": 68000,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\",\n  \"user\": \"fake-owner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "21 Duplicate username or email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo_user_a\",\n  \"email\": \"demo.a@example.com\",\n  \"password\": \"{{localPasswordA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "22 Nonexistent employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees/507f1f77bcf86cd799439011",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "507f1f77bcf86cd799439011"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "23 Malformed JSON body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\":",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4 - Cleanup and DELETE 204",
+      "item": [
+        {
+          "name": "24 User A deletes Employee A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });",
+                  "pm.test(\"Empty body for 204\", function () { pm.expect(pm.response.text()).to.eql(\"\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "eid",
+                  "value": "{{employeeAId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "25 User B deletes Employee B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeBId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "eid",
+                  "value": "{{employeeBId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5 - OPTIONAL RATE LIMIT (RUN SEPARATELY)",
+      "item": [
+        {
+          "name": "Rate limit test. Run separately 11 times",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Before threshold 401, after threshold 429\", function () { pm.expect([401,429]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 429) console.log(\"Rate limiter correctly returned 429\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nobody\",\n  \"password\": \"WrongPassword1!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            },
+            "description": "Use the Postman Collection Runner to repeat this request at least 11 times in a fresh 15-minute window. Capture response 429. Do not include this folder in the normal full collection run."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vercel Production",
+      "item": [
+        {
+          "name": "01 Health Check (Vercel)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/health",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 Register User A (Vercel)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vercel_test_user_a\",\n  \"email\": \"vercel.test.user.a@example.com\",\n  \"password\": \"{{prodPasswordA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/user/signup",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 Login User A (Vercel)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\n{\n  \"username\": \"vercel_test_user_a\",\n  \"password\": \"{{prodPasswordA}}\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/user/login",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"prodTokenA\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Create Employee A (Vercel)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\n{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.vercel.test@example.com\",\n  \"position\": \"Senior Developer\",\n  \"salary\": 73000,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"prodEmployeeAId\", pm.response.json().data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 Get All Employees (Vercel)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenA}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 Get Employee A by ID (Vercel)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees/{{prodEmployeeAId}}",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{prodEmployeeAId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 Update Employee A (Vercel)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Lead Developer\",\n  \"salary\": 80000,\n  \"department\": \"IT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees/{{prodEmployeeAId}}",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{prodEmployeeAId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 Register User B (Vercel)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\n{\n  \"username\": \"vercel_test_user_b\",\n  \"email\": \"vercel.test.user.b@example.com\",\n  \"password\": \"{{prodPasswordB}}\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/user/signup",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 Login User B (Vercel)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\n{\n  \"email\": \"vercel.test.user.b@example.com\",\n  \"password\": \"{{prodPasswordB}}\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/user/login",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"prodTokenB\", pm.response.json().data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 User B Cannot Access Employee A (Vercel)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees/{{prodEmployeeAId}}",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{prodEmployeeAId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenB}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11 User B Get All Employees (Vercel)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenB}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12 Delete Employee A (Vercel)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees?eid={{prodEmployeeAId}}",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "eid",
+                  "value": "{{prodEmployeeAId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13 Verify Employee A Deleted (Vercel)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{prodTokenA}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://101436656-comp-3123-assignment1.vercel.app/api/v1/emp/employees/{{prodEmployeeAId}}",
+              "protocol": "https",
+              "host": [
+                "101436656-comp-3123-assignment1",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "emp",
+                "employees",
+                "{{prodEmployeeAId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
   "variable": [
     {
       "key": "baseUrl",
@@ -32,952 +1769,40 @@
     {
       "key": "invalidToken",
       "value": "not-a-valid-token"
-    }
-  ],
-  "item": [
-    {
-      "name": "1 - Health, signup, login",
-      "item": [
-        {
-          "name": "01 Health check",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/health",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.test(\"Database connected\", () => pm.expect(pm.response.json().database).to.eql(\"connected\"));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "02 Register User A",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/user/signup",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"demo_user_a\",\n  \"email\": \"demo.a@example.com\",\n  \"password\": \"StudyDemoA1!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
-                  "pm.test(\"No password in response\", function () { pm.expect(pm.response.text()).to.not.include(\"StudyDemoA1!\"); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "03 Register User B",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/user/signup",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"demo_user_b\",\n  \"email\": \"demo.b@example.com\",\n  \"password\": \"StudyDemoB1!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
-                  "pm.test(\"User B created\", function () { pm.expect(pm.response.json().data.user.username).to.eql(\"demo_user_b\"); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "04 Login User A (username)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/user/login",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"demo_user_a\",\n  \"password\": \"StudyDemoA1!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.collectionVariables.set(\"tokenA\", pm.response.json().data.token);",
-                  "pm.test(\"Bearer token supplied\", function () { pm.expect(pm.response.json().data.token).to.be.a(\"string\"); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "05 Login User B (email)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/user/login",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"demo.b@example.com\",\n  \"password\": \"StudyDemoB1!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.collectionVariables.set(\"tokenB\", pm.response.json().data.token);"
-                ]
-              }
-            }
-          ]
-        }
-      ]
     },
     {
-      "name": "2 - Employee success tests",
-      "item": [
-        {
-          "name": "06 User A creates Employee A",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.rivera@example.com\",\n  \"position\": \"Software Developer\",\n  \"salary\": 68000,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
-                  "pm.collectionVariables.set(\"employeeAId\", pm.response.json().data._id);",
-                  "pm.test(\"Has owner\", function () { pm.expect(pm.response.json().data.user).to.be.a(\"string\"); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "07 User B creates Employee B",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenB}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"first_name\": \"Jordan\",\n  \"last_name\": \"Patel\",\n  \"email\": \"jordan.patel@example.com\",\n  \"position\": \"Analyst\",\n  \"salary\": 59000,\n  \"date_of_joining\": \"2026-02-15\",\n  \"department\": \"Operations\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
-                  "pm.collectionVariables.set(\"employeeBId\", pm.response.json().data._id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "08 User A lists only own employees",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.test(\"A sees employee A only\", function () { const ids = pm.response.json().data.map(e => e._id); pm.expect(ids).to.include(pm.collectionVariables.get(\"employeeAId\")); pm.expect(ids).to.not.include(pm.collectionVariables.get(\"employeeBId\")); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "09 User A gets Employee A",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees/{{employeeAId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "10 User A updates Employee A",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees/{{employeeAId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"position\": \"Senior Developer\",\n  \"salary\": 73000\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.test(\"Update saved\", function () { pm.expect(pm.response.json().data.position).to.eql(\"Senior Developer\"); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
+      "key": "localPasswordA",
+      "value": "",
+      "secret": true
     },
     {
-      "name": "3 - Security and validation failures",
-      "item": [
-        {
-          "name": "11 User A cannot GET Employee B",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees/{{employeeBId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "12 User B cannot GET Employee A",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees/{{employeeAId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenB}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "13 User A cannot UPDATE Employee B",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees/{{employeeBId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"position\": \"Unauthorized change\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "14 User B cannot DELETE Employee A",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeAId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenB}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "15 User A cannot DELETE Employee B",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeBId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "16 Missing JWT",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "17 Invalid JWT",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{invalidToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "18 Invalid employee ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees/not-a-mongo-id",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "19 Invalid salary",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.rivera@example.com\",\n  \"position\": \"Software Developer\",\n  \"salary\": -200,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "20 Attempt to set owner from request body",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"first_name\": \"Alex\",\n  \"last_name\": \"Rivera\",\n  \"email\": \"alex.rivera@example.com\",\n  \"position\": \"Software Developer\",\n  \"salary\": 68000,\n  \"date_of_joining\": \"2026-01-12\",\n  \"department\": \"IT\",\n  \"user\": \"fake-owner\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "21 Duplicate username or email",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/user/signup",
-            "description": "",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"demo_user_a\",\n  \"email\": \"demo.a@example.com\",\n  \"password\": \"StudyDemoA1!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "22 Nonexistent employee",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees/507f1f77bcf86cd799439011",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "23 Malformed JSON body",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/emp/employees",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\"first_name\":",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
+      "key": "localPasswordB",
+      "value": "",
+      "secret": true
     },
     {
-      "name": "4 - Cleanup and DELETE 204",
-      "item": [
-        {
-          "name": "24 User A deletes Employee A",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeAId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenA}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });",
-                  "pm.test(\"Empty body for 204\", function () { pm.expect(pm.response.text()).to.eql(\"\"); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "25 User B deletes Employee B",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/api/v1/emp/employees?eid={{employeeBId}}",
-            "description": "",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{tokenB}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
+      "key": "prodPasswordA",
+      "value": "",
+      "secret": true
     },
     {
-      "name": "5 - OPTIONAL RATE LIMIT (RUN SEPARATELY)",
-      "item": [
-        {
-          "name": "Rate limit test. Run separately 11 times",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/v1/user/login",
-            "description": "Use the Postman Collection Runner to repeat this request at least 11 times in a fresh 15-minute window. Capture response 429. Do not include this folder in the normal full collection run.",
-            "auth": {
-              "type": "noauth"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"nobody\",\n  \"password\": \"WrongPassword1!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Before threshold 401, after threshold 429\", function () { pm.expect([401,429]).to.include(pm.response.code); });",
-                  "if (pm.response.code === 429) console.log(\"Rate limiter correctly returned 429\");"
-                ]
-              }
-            }
-          ]
-        }
-      ]
+      "key": "prodPasswordB",
+      "value": "",
+      "secret": true
+    },
+    {
+      "key": "prodTokenA",
+      "value": "",
+      "secret": true
+    },
+    {
+      "key": "prodTokenB",
+      "value": "",
+      "secret": true
+    },
+    {
+      "key": "prodEmployeeAId",
+      "value": ""
     }
   ]
 }
