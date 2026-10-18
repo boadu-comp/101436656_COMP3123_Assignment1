@@ -11,6 +11,11 @@ const { connectDatabase } = require('./config/database');
 
 const app = express();
 app.disable('x-powered-by');
+
+if (process.env.VERCEL) {
+  app.set('trust proxy', 1);
+}
+
 app.use(helmet());
 app.use(requestLogger);
 app.use(express.json({ limit: '16kb' }));
