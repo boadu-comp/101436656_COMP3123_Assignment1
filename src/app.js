@@ -7,6 +7,7 @@ const { apiLimiter } = require('./middleware/rateLimiters');
 const userRoutes = require('./routes/userRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
+const { connectDatabase } = require('./config/database');
 
 const app = express();
 app.disable('x-powered-by');
@@ -14,6 +15,25 @@ app.use(helmet());
 app.use(requestLogger);
 app.use(express.json({ limit: '16kb' }));
 app.use(apiLimiter);
+let connecting;
+
+app.use(async (req, res, next) => {
+  if (!process.env.VERCEL) return next();
+
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      if (!connecting) {
+        connecting = connectDatabase().finally(() => {
+          connecting = null;
+        });
+      }
+      await connecting;
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.get('/health', (req, res) => {
   res.status(200).json({
